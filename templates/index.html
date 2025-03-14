@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaxiCity — Быстрое такси в вашем городе</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            color: white;
+        }
+
+        .header {
+            padding: 20px 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            color: #4CAF50;
+        }
+
+        .auth-buttons button {
+            margin-left: 15px;
+            padding: 10px 25px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: 0.3s;
+            background: #4CAF50;
+            color: white;
+        }
+
+        .auth-buttons button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .order-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        input, select {
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .submit-btn {
+            background: #4CAF50;
+            color: white;
+            padding: 15px;
+            font-size: 18px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .submit-btn:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            margin-top: 50px;
+            text-align: center;
+        }
+
+        .feature-card {
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            transition: 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            margin-top: 50px;
+        }
+
+        @media (max-width: 768px) {
+            .features {
+                grid-template-columns: 1fr;
+            }
+
+            .header {
+                padding: 20px;
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo">🚕 TaxiCity</div>
+        <div class="auth-buttons">
+            <button onclick="location.href='#login'">Войти</button>
+            <button onclick="location.href='#register'">Регистрация</button>
+        </div>
+    </header>
+
+    <div class="container">
+        <h1 style="text-align: center; margin-bottom: 30px;">Заказать такси</h1>
+        <form class="order-form">
+            <div class="form-group">
+                <label>Пункт А:</label>
+                <input type="text" placeholder="Откуда вас забрать?" required>
+            </div>
+
+            <div class="form-group">
+                <label>Пункт Б:</label>
+                <input type="text" placeholder="Куда вам нужно?" required>
+            </div>
+
+            <div class="form-group">
+                <label>Тип автомобиля:</label>
+                <select>
+                    <option>Эконом</option>
+                    <option>Комфорт</option>
+                    <option>Бизнес</option>
+                    <option>Минивэн</option>
+                </select>
+            </div>
+
+            <button type="submit" class="submit-btn">Найти автомобиль</button>
+        </form>
+
+        <div class="features">
+            <div class="feature-card">
+                <h3>🚙 Быстро</h3>
+                <p>Среднее время подачи автомобиля — 5 минут</p>
+            </div>
+            <div class="feature-card">
+                <h3>💰 Выгодно</h3>
+                <p>Лучшие цены в городе и специальные предложения</p>
+            </div>
+            <div class="feature-card">
+                <h3>⭐ Надежно</h3>
+                <p>Все водители проходят строгую проверку</p>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>© 2024 TaxiCity. Все права защищены</p>
+        <p>Контактиы: +7 (495) 123-45-67 | support@taxi-city.ru</p>
+    </footer>
+</body>
+</html>
