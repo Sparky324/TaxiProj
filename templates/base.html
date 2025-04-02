@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MaITaxI - {% block title %}{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <header class="header">
+    <a href="{{ url_for('home') }}" class="logo">🚕 TaxiCity</a>
+    <div class="auth-buttons">
+        {% if request.endpoint != 'login' %}
+            <a href="{{ url_for('login') }}" class="btn">Войти</a>
+        {% endif %}
+        {% if request.endpoint != 'register' %}
+            <a href="{{ url_for('register') }}" class="btn">Регистрация</a>
+        {% endif %}
+    </div>
+</header>
+
+    <div class="container">
+        {% block content %}{% endblock %}
+    </div>
+
+    <footer>
+        <p>© 2024 MaITaxI. Все права защищены</p>
+        <p>Контакты: +7 (969) 282-30-60 | sparkyegor@ya.ru</p>
+    </footer>
+</body>
+</html>

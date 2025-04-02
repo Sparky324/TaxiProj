@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Регистрация{% endblock %}
+
+{% block content %}
+<div class="auth-form">
+    <h1 style="text-align: center; margin-bottom: 30px;">Регистрация</h1>
+    <form method="POST">
+        <div class="form-group">
+            <label>Имя:</label>
+            <input type="text" name="name" placeholder="Ваше полное имя" required>
+        </div>
+
+        <div class="form-group">
+            <label>Email:</label>
+            <input type="email" name="email" placeholder="example@mail.ru" required>
+        </div>
+
+        <div class="form-group">
+            <label>Пароль:</label>
+            <input type="password" name="password" placeholder="Не менее 6 символов" required>
+        </div>
+
+        <button type="submit" class="submit-btn">Зарегистрироваться</button>
+    </form>
+
+    <div class="auth-links">
+        <p>Уже есть аккаунт? <a href="{{ url_for('login') }}">Войти сейчас</a></p>
+    </div>
+</div>
+{% endblock %}
