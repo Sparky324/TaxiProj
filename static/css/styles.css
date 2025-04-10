@@ -25,6 +25,31 @@ body {
     font-size: 28px;
     font-weight: bold;
     color: #4CAF50;
+    text-decoration: none;
+    transition: transform 0.3s ease;
+}
+
+.logo:hover {
+    transform: scale(1.05);
+    color: #45a049;
+    cursor: pointer;
+}
+
+.auth-buttons .btn {
+    margin-left: 15px;
+    padding: 10px 25px;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: 0.3s;
+    background: #4CAF50;
+    color: white;
+    text-decoration: none;
+}
+
+.auth-buttons .btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
 }
 
 /* Основной контейнер */
@@ -35,6 +60,11 @@ body {
     background: rgba(255, 255, 255, 0.1);
     border-radius: 20px;
     backdrop-filter: blur(10px);
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 30px;
 }
 
 /* Формы */
@@ -106,7 +136,7 @@ input, select {
 
 .auth-buttons .btn:hover {
     transform: scale(1.05);
-    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
 }
 
 /* Футер */
@@ -124,23 +154,30 @@ footer {
         flex-direction: column;
         gap: 15px;
     }
-    
+
     .container {
         margin: 30px 15px;
         padding: 20px;
     }
 }
 
-.logo {
-    font-size: 28px;
-    font-weight: bold;
-    color: #4CAF50;
-    text-decoration: none;
-    transition: transform 0.3s ease;
+/* Стили для главной страницы */
+.features {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 30px;
+    margin-top: 50px;
+    text-align: center;
 }
 
-.logo:hover {
-    transform: scale(1.05);
-    color: #45a049;
-    cursor: pointer;
+.feature-card {
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    transition: 0.3s;
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+    background: rgba(255, 255, 255, 0.2);
 }

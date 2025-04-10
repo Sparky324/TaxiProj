@@ -4,10 +4,21 @@
 {% block content %}
 <div class="auth-form">
     <h1 style="text-align: center; margin-bottom: 30px;">Вход в систему</h1>
+
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <ul>
+                {% for message in messages %}
+                    <li>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+
     <form method="POST">
         <div class="form-group">
-            <label>Email:</label>
-            <input type="email" name="email" placeholder="example@mail.ru" required>
+            <label>Имя пользователя или Email:</label>
+            <input type="text" name="username_or_email" placeholder="Введите имя пользователя или email" required>
         </div>
 
         <div class="form-group">
