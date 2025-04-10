@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MaITaxI — {% block title %}{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <header class="header">
+    <a href="{{ url_for('home') }}" class="logo">MaITaxI</a>
+    <div class="auth-buttons">
+        {% if 'user_id' in session %}
+            <!-- Если пользователь вошел, показываем кнопку с его именем -->
+            <a href="{{ url_for('account') }}" class="btn">{{ session['username'] }}</a>
+        {% else %}
+            <!-- Если пользователь не вошел, показываем кнопки входа и регистрации -->
+            {% if request.endpoint != 'login' %}
+                <a href="{{ url_for('login') }}" class="btn">Войти</a>
+            {% endif %}
+            {% if request.endpoint != 'register' %}
+                <a href="{{ url_for('register') }}" class="btn">Регистрация</a>
+            {% endif %}
+        {% endif %}
+    </div>
+</header>
+
+
+    <div class="container">
+        {% if 'user_id' in session %}
+            <h2 style="text-align: center; margin-bottom: 30px;">Добро пожаловать, {{ session['username'] }}!</h2>
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </div>
+
+    <footer>
+        <p>© 2024 MaITaxI. Все права защищены</p>
+        <p>Контакты: +7 (969) 282-30-60 | sparkyegor@ya.ru</p>
+    </footer>
+</body>
+</html>

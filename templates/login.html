@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Вход{% endblock %}
+
+{% block content %}
+<div class="auth-form">
+    <h1 style="text-align: center; margin-bottom: 30px;">Вход в систему</h1>
+
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <ul>
+                {% for message in messages %}
+                    <li>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+
+    <form method="POST">
+        <div class="form-group">
+            <label>Имя пользователя или Email:</label>
+            <input type="text" name="username_or_email" placeholder="Введите имя пользователя или email" required>
+        </div>
+
+        <div class="form-group">
+            <label>Пароль:</label>
+            <input type="password" name="password" placeholder="Введите пароль" required>
+        </div>
+
+        <button type="submit" class="submit-btn">Войти</button>
+    </form>
+
+    <div class="auth-links">
+        <p>Ещё нет аккаунта? <a href="{{ url_for('register') }}">Создать новый</a></p>
+    </div>
+</div>
+{% endblock %}

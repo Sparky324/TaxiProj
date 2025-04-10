@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Личный кабинет{% endblock %}
+
+{% block content %}
+<div class="account-container">
+    <h1>{{ user.first_name }} {{ user.last_name }} - Личный кабинет</h1>
+    
+    <div class="tabs">
+        <button class="tab-button" onclick="showTab('personal-data')">Личные данные</button>
+        <button class="tab-button" onclick="showTab('trips')">История поездок</button>
+        <a href="{{ url_for('logout') }}" class="logout-btn">Выйти</a>
+    </div>
+
+    <div id="personal-data" class="tab-content">
+        <h2>Личные данные</h2>
+        <p><strong>Имя:</strong> {{ user.first_name }} {{ user.last_name }}</p>
+        <p><strong>Номер телефона:</strong> {{ user.phone }}</p>
+        <p><strong>Email:</strong> {{ user.email }}</p>
+    </div>
+
+    <div id="trips" class="tab-content" style="display:none;">
+        <h2>История поездок</h2>
+        {% if trips %}
+            <ul>
+                {% for trip in trips %}
+                    <li>{{ trip.date }} - {{ trip.destination }}</li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>История поездок пуста.</p>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    function showTab(tabName) {
+        const tabs = document.querySelectorAll('.tab-content');
+        tabs.forEach(tab => {
+            tab.style.display = 'none';
+        });
+
+        const selectedTab = document.getElementById(tabName);
+        selectedTab.style.display = 'block';
+    }
+</script>
+{% endblock %}
