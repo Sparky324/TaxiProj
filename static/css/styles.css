@@ -277,3 +277,50 @@ h3 {
     stroke: white;
     stroke-width: 2;
 }
+
+.suggestions {
+    background-color: white;
+    border: 1px solid #ccc;
+    max-height: 200px;
+    width: 100%;
+    box-sizing: border-box;
+    margin-top: 5px;
+    z-index: 1000;
+}
+
+.suggestion {
+    padding: 8px;
+    cursor: pointer;
+    color: #333;
+    font-size: 14px;
+    border-bottom: 1px solid #ddd;
+}
+
+.suggestion:hover {
+    background-color: #f0f0f0;
+}
+
+.highlight {
+    background-color: yellow;
+}
+
+.map-btn {
+    margin-top: 5px;
+    padding: 6px 10px;
+    background-color: #2196F3;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.map-btn:hover {
+    background-color: #1976D2;
+}
+
+input[type="text"]:focus + .suggestions {
+    display: block;
+}
+
+
+
