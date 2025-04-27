@@ -3,7 +3,7 @@ import sqlite3
 from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
-app.secret_key = 'your-secret-key-here'  # Нужно для работы с сессиями
+app.secret_key = 'your-secret-key-here'
 
 DATABASE = 'users.db'
 
@@ -24,7 +24,7 @@ def init_db():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             username TEXT UNIQUE NOT NULL,
             email TEXT UNIQUE NOT NULL,
-            password TEXT NOT NULL,
+            password TEXT NOT NULL
         )
     ''')
     cursor.execute('''
@@ -83,6 +83,8 @@ def register():
         username = request.form['username']
         email = request.form['email']
         password = request.form['password']
+        phone = request.form['phone']
+        full_name = request.form['full_name']
 
         # Проверим, что все поля заполнены
         if not username or not email or not password:
@@ -95,9 +97,9 @@ def register():
         conn = get_db_connection()
         try:
             conn.execute('''
-                INSERT INTO users (username, email, password)
-                VALUES (?, ?, ?)
-            ''', (username, email, hashed_password))
+                INSERT INTO users (username, email, password, phone, full_name)
+                VALUES (?, ?, ?, ?, ?)
+            ''', (username, email, hashed_password, phone, full_name))
             conn.commit()
         except sqlite3.IntegrityError:
             flash('Пользователь с таким именем или email уже существует!')
@@ -139,6 +141,15 @@ def logout():
     session.clear()
     flash('Вы вышли из системы.')
     return redirect(url_for('home'))
+
+
+@app.route("/change")
+def change():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    user_id = session['user_id']
+    conn = get_db_connection()
+    return render_template("change.html", user_id=user_id)
 
 
 if __name__ == "__main__":

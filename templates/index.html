@@ -1,5 +1,4 @@
 {% extends "base.html" %}
-
 {% block title %}MaITaxI — Быстрое такси в вашем городе{% endblock %}
 
 {% block content %}
@@ -8,22 +7,28 @@
         <form class="order-form">
             <div class="form-group">
                 <label>Пункт А:</label>
-                <input type="text" placeholder="Откуда вас забрать?" required>
+                <input id="pointA" type="text" placeholder="Откуда вас забрать?" required autocomplete="off">
+                <div id="suggestionsA" class="suggestions"></div>
             </div>
 
             <div class="form-group">
                 <label>Пункт Б:</label>
-                <input type="text" placeholder="Куда вам нужно?" required>
+                <input id="pointB" type="text" placeholder="Куда вам нужно?" required autocomplete="off">
+                <div id="suggestionsB" class="suggestions"></div>
             </div>
 
             <div class="form-group">
                 <label>Тип автомобиля:</label>
-                <select>
-                    <option>Эконом</option>
-                    <option>Комфорт</option>
-                    <option>Бизнес</option>
-                    <option>Минивэн</option>
+                <select id="carType">
+                    <option value="econom">Эконом</option>
+                    <option value="comfort">Комфорт</option>
+                    <option value="business">Бизнес</option>
+                    <option value="minivan">Минивэн</option>
                 </select>
+            </div>
+
+            <div id="priceCalculation" style="display: none;">
+                <h3>Стоимость: <span id="price">0</span> руб.</h3>
             </div>
 
             <button type="submit" class="submit-btn">Найти автомобиль</button>
@@ -44,4 +49,124 @@
             </div>
         </div>
     </div>
+
+    <script type="text/javascript">
+        const apiKeySuggest = 'ce8efa73-9786-4290-9c44-961d4ea15f04';
+        const apiKeyCoder = 'ce095acd-05a3-4919-9cf4-7e64c641af28';
+
+        function fetchSuggestions(inputId, suggestionsId) {
+            const input = document.getElementById(inputId);
+            const suggestionsContainer = document.getElementById(suggestionsId);
+
+            input.addEventListener('input', function () {
+                const query = input.value;
+                if (query.length < 3) {
+                    suggestionsContainer.innerHTML = '';
+                    return;
+                }
+
+                fetch(`https://suggest-maps.yandex.ru/v1/suggest?apikey=${apiKeySuggest}&text=${query}&results=5`)
+                    .then(response => response.json())
+                    .then(data => {
+                        suggestionsContainer.innerHTML = '';
+                        const results = data.results;
+
+                        if (results) {
+                            results.forEach(item => {
+                                const suggestionText = item.title.text;
+                                const highlightedText = highlightText(suggestionText, item.title.hl);
+
+                                const suggestion = document.createElement('div');
+                                suggestion.classList.add('suggestion');
+                                suggestion.innerHTML = highlightedText;
+                                suggestion.addEventListener('click', () => {
+                                    input.value = suggestionText;
+                                    suggestionsContainer.innerHTML = '';
+                                    calculatePrice();
+                                });
+                                suggestionsContainer.appendChild(suggestion);
+                            });
+                        }
+                    })
+                    .catch(error => console.error('Error fetching Yandex data:', error));
+            });
+        }
+
+        function highlightText(text, hlArray) {
+            if (!hlArray || hlArray.length === 0) return text;
+
+            let highlightedText = text;
+            hlArray.reverse().forEach(hl => {
+                const start = hl.begin;
+                const end = hl.end;
+                const highlightedPart = `<span class="highlight">${text.substring(start, end)}</span>`;
+                highlightedText = highlightedText.slice(0, start) + highlightedPart + highlightedText.slice(end);
+            });
+            return highlightedText;
+        }
+
+        function calculatePrice() {
+            const pointA = document.getElementById('pointA').value;
+            const pointB = document.getElementById('pointB').value;
+
+            if (pointA && pointB) {
+                const distance = 10;
+                const time = 15;
+
+                const carType = document.getElementById("carType").value;
+                let price;
+
+                switch (carType) {
+                    case 'econom':
+                        price = 150 + Math.max(distance * 10, time * 3);
+                        break;
+                    case 'comfort':
+                        price = 210 + Math.max(distance * 12, time * 4);
+                        break;
+                    case 'business':
+                        price = 350 + Math.max(distance * 15, time * 5);
+                        break;
+                    case 'minivan':
+                        price = 240 + Math.max(distance * 12, time * 4);
+                        break;
+                }
+
+                document.getElementById("price").innerText = price.toFixed(2);
+                document.getElementById("priceCalculation").style.display = 'block';
+            }
+        }
+
+        getUserLocation();
+
+        function getUserLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    fetch(`https://geocode-maps.yandex.ru/v1/?apikey=${apiKeyCoder}&geocode=${position.coords.longitude},${position.coords.latitude}&format=json&lang=ru_RU`)
+                        .then(response => response.json())
+                        .then(data => {
+                            const featureMember = data.response.GeoObjectCollection.featureMember;
+
+                            if (featureMember && featureMember.length > 0) {
+                                const address = featureMember[0].GeoObject.metaDataProperty.GeocoderMetaData.text;
+                                document.getElementById('pointA').value = address;
+                            } else {
+                                console.error("Адрес не найден.");
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error fetching geocoding data:', error);
+                            alert("Ошибка при получении данных с геокодера.");
+                        });
+
+                    fetchSuggestions('pointA', 'suggestionsA');
+                    fetchSuggestions('pointB', 'suggestionsB');
+                }, function(error) {
+                    //console.error("Geolocation error: " + error.message);
+                    alert("Не удалось получить геолокацию. Используйте поиск по адресу.");
+                });
+            } else {
+                alert("Геолокация не поддерживается вашим браузером.");
+            }
+        }
+    </script>
 {% endblock %}
