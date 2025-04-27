@@ -28,7 +28,7 @@
             </div>
 
             <div id="priceCalculation" style="display: none;">
-                <h3>Стоимость: ~<span id="price">0</span> руб.</h3>
+                <h3>Стоимость: <span id="price">0</span> руб.</h3>
             </div>
 
             <button type="submit" class="submit-btn">Найти автомобиль</button>
@@ -53,32 +53,6 @@
     <script type="text/javascript">
         const apiKeySuggest = 'ce8efa73-9786-4290-9c44-961d4ea15f04';
         const apiKeyCoder = 'ce095acd-05a3-4919-9cf4-7e64c641af28';
-
-        function getUserLocation() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(function(position) {
-                    const lat = position.coords.latitude;
-                    const lon = position.coords.longitude;
-                    const userLocation = `${lon},${lat}`;
-
-                    console.log("Your location is: " + userLocation);
-
-                fetch(`https://geocode-maps.yandex.ru/v1?apikey=${apiKey}&geocode=${userLocation}&lang=ru_RU&format=json`)
-                .then(response => response.json())
-                .then(data => {
-                    const address = data.response.GeoObjectCollection.featureMember[0].GeoObject.Address.formatted;
-                    document.getElementById('pointA').value = address;
-                })
-                .catch(error => console.error('Error fetching geocoding data:', error));
-                }, function(error) {
-                    console.error("Geolocation error: " + error.message);
-                    alert("Не удалось получить геолокацию. Используйте поиск по адресу.");
-                });
-            } else {
-                alert("Геолокация не поддерживается вашим браузером.");
-            }
-        }
-
 
         function fetchSuggestions(inputId, suggestionsId) {
             const input = document.getElementById(inputId);
@@ -163,6 +137,36 @@
         }
 
         getUserLocation();
-}
+
+        function getUserLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    fetch(`https://geocode-maps.yandex.ru/v1/?apikey=${apiKeyCoder}&geocode=${position.coords.longitude},${position.coords.latitude}&format=json&lang=ru_RU`)
+                        .then(response => response.json())
+                        .then(data => {
+                            const featureMember = data.response.GeoObjectCollection.featureMember;
+
+                            if (featureMember && featureMember.length > 0) {
+                                const address = featureMember[0].GeoObject.metaDataProperty.GeocoderMetaData.text;
+                                document.getElementById('pointA').value = address;
+                            } else {
+                                console.error("Адрес не найден.");
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error fetching geocoding data:', error);
+                            alert("Ошибка при получении данных с геокодера.");
+                        });
+
+                    fetchSuggestions('pointA', 'suggestionsA');
+                    fetchSuggestions('pointB', 'suggestionsB');
+                }, function(error) {
+                    //console.error("Geolocation error: " + error.message);
+                    alert("Не удалось получить геолокацию. Используйте поиск по адресу.");
+                });
+            } else {
+                alert("Геолокация не поддерживается вашим браузером.");
+            }
+        }
     </script>
 {% endblock %}
