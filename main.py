@@ -1,19 +1,18 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, session
+from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
 import sqlite3
 from werkzeug.security import generate_password_hash, check_password_hash
+import requests
 
 app = Flask(__name__)
-app.secret_key = 'your-secret-key-here'
+app.secret_key = 'f440b5015952421a8da7c24d297d120f'
 
 DATABASE = 'users.db'
-
 
 # Функция для подключения к базе данных
 def get_db_connection():
     conn = sqlite3.connect(DATABASE)
     conn.row_factory = sqlite3.Row
     return conn
-
 
 # Функция для инициализации базы данных (создание таблицы users и trips)
 def init_db():
@@ -39,10 +38,21 @@ def init_db():
     conn.commit()
     conn.close()
 
-
 # Инициализация базы данных
 init_db()
 
+# Функция для получения адреса по координатам через Яндекс API
+def get_address_from_coords(lat, lon):
+    api_key = "ce095acd-05a3-4919-9cf4-7e64c641af28"  # Ваш ключ API
+    url = f"https://geocode-maps.yandex.ru/v1/?apikey={api_key}&geocode={lon},{lat}&format=json"
+    response = requests.get(url)
+    data = response.json()
+
+    try:
+        address = data['response']['GeoObjectCollection']['featureMember'][0]['GeoObject']['metaDataProperty']['GeocoderMetaData']['text']
+        return address
+    except KeyError:
+        return None
 
 @app.route("/")
 def home():
@@ -50,7 +60,6 @@ def home():
     if 'user_id' in session:
         return render_template("index.html", username=session['username'])
     return render_template("index.html")
-
 
 @app.route("/login", methods=['GET', 'POST'])
 def login():
@@ -75,7 +84,6 @@ def login():
             flash('Неверное имя пользователя или пароль.')
 
     return render_template("login.html")
-
 
 @app.route("/register", methods=['GET', 'POST'])
 def register():
@@ -112,7 +120,6 @@ def register():
 
     return render_template("register.html")
 
-
 @app.route("/account", methods=['GET', 'POST'])
 def account():
     if 'user_id' not in session:
@@ -135,13 +142,11 @@ def account():
 
     return render_template("account.html", user=user, trips=trips)
 
-
 @app.route("/logout")
 def logout():
     session.clear()
     flash('Вы вышли из системы.')
     return redirect(url_for('home'))
-
 
 @app.route("/change")
 def change():
@@ -151,6 +156,16 @@ def change():
     conn = get_db_connection()
     return render_template("change.html", user_id=user_id)
 
+@app.route("/get_address", methods=['GET'])
+def get_address():
+    lat = request.args.get('lat')
+    lon = request.args.get('lon')
+
+    address = get_address_from_coords(lat, lon)
+    if address:
+        return jsonify({'address': address})
+    else:
+        return jsonify({'address': 'Адрес не найден'}), 404
 
 if __name__ == "__main__":
     app.run(debug=True)
