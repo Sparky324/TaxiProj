@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Заказ №{{ order['order_id'] }}</title>
+    <script>
+        let timeRemaining = 5 * 60;
+
+        function updateStatus() {
+            if (timeRemaining <= 0) {
+                document.getElementById('status').innerText = 'Поездка завершена';
+                document.getElementById('finish_button').style.display = 'block';
+            } else if (timeRemaining <= 60) {
+                document.getElementById('status').innerText = 'Поездка в процессе';
+            } else {
+                document.getElementById('status').innerText = 'Водитель в пути';
+            }
+            timeRemaining--;
+        }
+
+        setInterval(updateStatus, 1000);
+    </script>
+</head>
+<body>
+    <h1>Заказ №{{ order['order_id'] }}</h1>
+    <p>Водитель: {{ driver['first_name'] }} {{ driver['last_name'] }}</p>
+    <p>Телефон для связи: {{ driver['phone'] }}</p>
+    <p>Автомобиль: {{ driver['car_model'] }} ({{ driver['car_color'] }})</p>
+    <p>Номер автомобиля: {{ driver['car_number'] }}</p>
+    <p>Ожидаемое время прибытия: {{ arrival_time }} минут</p>
+    <p id="status">Статус: В пути...</p>
+
+    <!-- Кнопка для завершения поездки -->
+    <button id="finish_button" style="display:none;" onclick="finishTrip()">Завершить поездку</button>
+
+    <script>
+        function finishTrip() {
+            alert("Поездка завершена!");
+            // Здесь можно добавить код для завершения поездки (например, обновить статус в БД)
+        }
+    </script>
+</body>
+</html>
