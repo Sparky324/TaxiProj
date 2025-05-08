@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}Администрирование{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Добавить водителя</h1>
+    <form method="POST">
+        <div class="form-group">
+            <label for="first_name">Имя</label>
+            <input type="text" id="first_name" name="first_name" required>
+        </div>
+        <div class="form-group">
+            <label for="last_name">Фамилия</label>
+            <input type="text" id="last_name" name="last_name" required>
+        </div>
+        <div class="form-group">
+            <label for="middle_name">Отчество</label>
+            <input type="text" id="middle_name" name="middle_name">
+        </div>
+        <div class="form-group">
+            <label for="citizenship">Гражданство</label>
+            <input type="text" id="citizenship" name="citizenship" required>
+        </div>
+        <div class="form-group">
+            <label for="phone">Телефон</label>
+            <input type="text" id="phone" name="phone" required>
+        </div>
+        <div class="form-group">
+            <label for="car_number">Номер автомобиля</label>
+            <input type="text" id="car_number" name="car_number" required>
+        </div>
+        <div class="form-group">
+            <label for="car_model">Модель автомобиля</label>
+            <input type="text" id="car_model" name="car_model" required>
+        </div>
+        <div class="form-group">
+            <label for="car_color">Цвет автомобиля</label>
+            <input type="text" id="car_color" name="car_color" required>
+        </div>
+        <button type="submit" class="submit-btn">Добавить водителя</button>
+    </form>
+</div>
+{% endblock %}

@@ -4,7 +4,7 @@
 {% block content %}
     <div class="container">
         <h1 style="text-align: center; margin-bottom: 30px;">Заказать такси</h1>
-        <form class="order-form">
+        <form class="order-form" action="{{ url_for('find_car') }}" method="post">
             <div class="form-group">
                 <label>Пункт А:</label>
                 <input id="pointA" type="text" placeholder="Откуда вас забрать?" required autocomplete="off">
