@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Заказ №{{ order['order_id'] }}</title>
+    <!-- Подключаем внешний CSS-файл -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <script>
         let timeRemaining = 5 * 60;
 
@@ -23,21 +25,22 @@
     </script>
 </head>
 <body>
-    <h1>Заказ №{{ order['order_id'] }}</h1>
-    <p>Водитель: {{ driver['first_name'] }} {{ driver['last_name'] }}</p>
-    <p>Телефон для связи: {{ driver['phone'] }}</p>
-    <p>Автомобиль: {{ driver['car_model'] }} ({{ driver['car_color'] }})</p>
-    <p>Номер автомобиля: {{ driver['car_number'] }}</p>
-    <p>Ожидаемое время прибытия: {{ arrival_time }} минут</p>
-    <p id="status">Статус: В пути...</p>
+    <div class="order-container">
+        <h1>Заказ №{{ order['order_id'] }}</h1>
+        <p><strong>Водитель:</strong> {{ driver['first_name'] }} {{ driver['last_name'] }}</p>
+        <p><strong>Телефон для связи:</strong> {{ driver['phone'] }}</p>
+        <p><strong>Автомобиль:</strong> {{ driver['car_model'] }} ({{ driver['car_color'] }})</p>
+        <p><strong>Номер автомобиля:</strong> {{ driver['car_number'] }}</p>
+        <p><strong>Ожидаемое время прибытия:</strong> {{ arrival_time }} минут</p>
+        <p id="status">Статус: В пути...</p>
 
-    <!-- Кнопка для завершения поездки -->
-    <button id="finish_button" style="display:none;" onclick="finishTrip()">Завершить поездку</button>
+        <!-- Кнопка для завершения поездки -->
+        <button id="finish_button" class="finish-button" style="display:none;" onclick="finishTrip()">Завершить поездку</button>
+    </div>
 
     <script>
         function finishTrip() {
-            alert("Поездка завершена!");
-            // Здесь можно добавить код для завершения поездки (например, обновить статус в БД)
+            window.location.href = "{{ url_for('finish_trip', order_id=order['order_id']) }}";
         }
     </script>
 </body>
