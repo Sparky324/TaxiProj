@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, flash, ses
 import sqlite3
 from werkzeug.security import generate_password_hash, check_password_hash
 import random
+from datetime import datetime
 
 app = Flask(__name__)
 app.secret_key = 'your-secret-key-here'
@@ -16,7 +17,6 @@ def get_db_connection():
     return conn
 
 
-# Функция для инициализации базы данных
 def init_db():
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -27,19 +27,10 @@ def init_db():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             username TEXT UNIQUE NOT NULL,
             email TEXT UNIQUE NOT NULL,
+            f_name TEXT NOT NULL,
+            phone TEXT NOT NULL,
             password TEXT NOT NULL,
             is_admin BOOLEAN DEFAULT 0
-        )
-    ''')
-
-    # Создание таблицы trips
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS trips (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            user_id INTEGER,
-            destination TEXT NOT NULL,
-            date TEXT NOT NULL,
-            FOREIGN KEY (user_id) REFERENCES users(id)
         )
     ''')
 
@@ -59,17 +50,36 @@ def init_db():
         );
     """)
 
-    cursor.execute("""
+    # Создание таблицы для заказов
+    cursor.execute('''
         CREATE TABLE IF NOT EXISTS orders (
-            order_id INTEGER,
-            user_id INTEGER,
-            driver_id INTEGER,
-            status TEXT
+            order_id    INTEGER PRIMARY KEY,
+            user_id     INTEGER NOT NULL,
+            driver_id   INTEGER NOT NULL,
+            status      TEXT    NOT NULL,
+            date        TEXT    NOT NULL,
+            start_time  TEXT    NOT NULL,
+            end_time    TEXT    NOT NULL,
+            origin      TEXT    NOT NULL,
+            destination TEXT    NOT NULL,
+            wait_time   INTEGER NOT NULL,
+            FOREIGN KEY (user_id)   REFERENCES users(id),
+            FOREIGN KEY (driver_id) REFERENCES drivers(id)
+        );
+    ''')
+
+    # Создание таблицы для оценок водителей
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS driver_ratings (
+            driver_id INTEGER NOT NULL,
+            rate INTEGER NOT NULL,
+            FOREIGN KEY (driver_id) REFERENCES drivers(id)
         );
     """)
 
     conn.commit()
     conn.close()
+
 
 
 # Инициализация базы данных
@@ -78,7 +88,6 @@ init_db()
 
 @app.route("/")
 def home():
-    # Если пользователь вошел в систему, передаем его имя в шаблон
     if 'user_id' in session:
         return render_template("index.html", username=session['username'])
     return render_template("index.html")
@@ -115,7 +124,8 @@ def register():
         username = request.form['username']
         email = request.form['email']
         password = request.form['password']
-        name = request.form['name']
+        f_name = request.form['f_name']
+        phone = request.form['phone']
 
         if not username or not email or not password:
             flash('Пожалуйста, заполните все поля!')
@@ -126,9 +136,9 @@ def register():
         conn = get_db_connection()
         try:
             conn.execute('''
-                INSERT INTO users (username, email, password, name)
-                VALUES (?, ?, ?, ?)
-            ''', (username, email, hashed_password))
+                INSERT INTO users (username, email, password, f_name, phone)
+                VALUES (?, ?, ?, ?, ?)
+            ''', (username, email, hashed_password, f_name, phone))
             conn.commit()
         except sqlite3.IntegrityError:
             flash('Пользователь с таким именем или email уже существует!')
@@ -179,27 +189,28 @@ def logout():
     return redirect(url_for('home'))
 
 
-@app.route("/account", methods=['GET', 'POST'])
+@app.route("/account")
 def account():
     if 'user_id' not in session:
-        flash("Пожалуйста, войдите в систему.")
         return redirect(url_for('login'))
 
     user_id = session['user_id']
-
-    # Получаем данные пользователя
     conn = get_db_connection()
-    user = conn.execute('''
-        SELECT * FROM users WHERE id = ?
-    ''', (user_id,)).fetchone()
 
-    # Получаем историю поездок
-    trips = conn.execute('''
-        SELECT * FROM trips WHERE user_id = ?
+    # Данные пользователя
+    user = conn.execute("SELECT * FROM users WHERE id = ?", (user_id,)).fetchone()
+
+    # История заказов
+    orders = conn.execute('''
+        SELECT o.*, d.first_name, d.last_name, d.car_model, d.car_number 
+          FROM orders o
+          JOIN drivers d ON d.id = o.driver_id
+         WHERE o.user_id = ?
+         ORDER BY o.date DESC, o.start_time DESC
     ''', (user_id,)).fetchall()
     conn.close()
 
-    return render_template("account.html", user=user, trips=trips)
+    return render_template("account.html", user=user, orders=orders)
 
 
 @app.route("/change")
@@ -213,30 +224,42 @@ def change():
 
 @app.route('/find_car', methods=['POST'])
 def find_car():
-    # Получаем данные из формы или сессии
-    user_id = session.get('user_id')  # или другой способ получения данных о пользователе
-
-    # Ищем первого свободного водителя в базе данных
+    user_id = session['user_id']
     conn = get_db_connection()
     driver = conn.execute("SELECT * FROM drivers WHERE status = 'free' LIMIT 1").fetchone()
+    if not driver:
+        flash("Свободных водителей нет.")
+        return redirect(url_for('home'))
 
-    if driver:
-        # Генерируем уникальный ID для заказа
-        order_id = random.randint(1000, 9999)
+    # Генерим order_id
+    order_id = random.randint(1000, 9999)
+    now = datetime.now()
+    date_str = now.strftime('%Y-%m-%d')
+    start_str = now.strftime('%H:%M:%S')
 
-        # Обновляем статус водителя на "занят"
-        conn.execute("UPDATE drivers SET status = 'busy' WHERE id = ?", (driver['id'],))
-        conn.commit()
+    origin = request.form.get('pointA', '')
+    destination = request.form.get('pointB', '')
 
-        # Сохраняем информацию о заказе (пока заглушка)
-        conn.execute("INSERT INTO orders (order_id, user_id, driver_id, status) VALUES (?, ?, ?, ?)",
-                     (order_id, user_id, driver['id'], 'pending'))
-        conn.commit()
+    if not origin or not destination:
+        flash("Поля Пункт А и Пункт Б должны быть заполнены.")
+        return redirect(url_for('home'))
 
-        # Переадресуем на страницу заказа
-        return redirect(url_for('order', order_id=order_id))
+    wait_time = 5  #TODO: сделать определение реального времени
 
-    return "Свободных водителей нет", 404
+    # Обновляем статус водителя
+    conn.execute("UPDATE drivers SET status = 'busy' WHERE id = ?", (driver['id'],))
+
+    # Вставляем заказ с временным значением для end_time (например, пустая строка)
+    conn.execute('''
+        INSERT INTO orders 
+          (order_id,user_id,driver_id,status,date,start_time,end_time,origin,destination,wait_time)
+        VALUES (?,?,?,?,?,?,?,?,?,?)
+    ''', (order_id, user_id, driver['id'], 'В процессе',
+          date_str, start_str, "", origin, destination, wait_time))
+    conn.commit()
+    conn.close()
+
+    return redirect(url_for('order', order_id=order_id))
 
 
 @app.route('/order/<int:order_id>')
@@ -256,6 +279,58 @@ def order(order_id):
     arrival_time = 5
 
     return render_template('order.html', order=order, driver=driver, arrival_time=arrival_time)
+
+
+@app.route('/finish_trip/<int:order_id>', methods=['POST'])
+def finish_trip(order_id):
+    now = datetime.now()
+    end_str = now.strftime('%H:%M:%S')
+
+    conn = get_db_connection()
+
+    # Обновление статуса заказа и времени завершения
+    conn.execute('''
+      UPDATE orders 
+         SET status = 'Завершена', end_time = ?
+       WHERE order_id = ?
+    ''', (end_str, order_id))
+    conn.commit()
+
+    # Свободим водителя
+    driver_id = conn.execute('SELECT driver_id FROM orders WHERE order_id = ?', (order_id,)).fetchone()['driver_id']
+    conn.execute("UPDATE drivers SET status = 'free' WHERE id = ?", (driver_id,))
+    conn.commit()
+    conn.close()
+
+    # Перенаправляем на страницу оценки
+    return redirect(url_for('end_order', order_id=order_id))
+
+
+@app.route('/end_order/<int:order_id>', methods=['GET', 'POST'])
+def end_order(order_id):
+    if request.method == 'POST':
+        rate = request.form.get('rate')
+
+        if rate is None or int(rate) < 1 or int(rate) > 5:
+            flash("Пожалуйста, выберите корректную оценку от 1 до 5.")
+            return redirect(url_for('end_order', order_id=order_id))
+
+        conn = get_db_connection()
+
+        # Сохраняем оценку водителя
+        driver_id = conn.execute('SELECT driver_id FROM orders WHERE order_id = ?', (order_id,)).fetchone()['driver_id']
+        conn.execute('''
+            INSERT INTO driver_ratings (driver_id, rate)
+            VALUES (?, ?)
+        ''', (driver_id, rate))
+        conn.commit()
+        conn.close()
+
+        flash("Спасибо за вашу оценку!")
+        return redirect(url_for('home'))
+
+    return render_template('end_order.html', order_id=order_id)
+
 
 
 

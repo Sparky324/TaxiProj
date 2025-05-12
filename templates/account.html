@@ -3,14 +3,14 @@
 
 {% block content %}
 <div class="account-container">
-    <div class="tabs">
-        <button class="tab-button" onclick="showTab('personal-data')">Личные данные</button>
-        <button class="tab-button" onclick="showTab('trips')">История поездок</button>
-        <button class="logout-btn" onclick="window.location.href='{{ url_for('logout') }}'">Выйти</button>
-    </div>
+  <div class="tabs">
+    <button class="tab-button" onclick="showTab('personal-data')">Личные данные</button>
+    <button class="tab-button" onclick="showTab('order-history')">История поездок</button>
+    <button class="logout-btn" onclick="window.location.href='{{ url_for('logout') }}'">Выйти</button>
+  </div>
 
-    <div id="personal-data" class="tab-content">
-        <h3>Личные данные
+  <div id="personal-data" class="tab-content">
+    <h3>Личные данные
             <a href="{{ url_for('change') }}" class="edit-btn">
                 <!-- Новый SVG с иконкой карандаша -->
                 <svg viewBox="0 0 512.00057 512" xmlns="http://www.w3.org/2000/svg" class="edit-icon">
@@ -18,34 +18,55 @@
                 </svg>
             </a>
         </h3>
-        <p><strong>Имя:</strong> {{ user.name }}</p>
+        <p><strong>Имя:</strong> {{ user.f_name }}</p>
         <p><strong>Номер телефона:</strong> {{ user.phone }}</p>
         <p><strong>Email:</strong> {{ user.email }}</p>
-    </div>
+  </div>
 
-    <div id="trips" class="tab-content" style="display:none;">
-        <h3>История поездок</h3>
-        {% if trips %}
-            <ul>
-                {% for trip in trips %}
-                    <li>{{ trip.date }} - {{ trip.destination }}</li>
-                {% endfor %}
-            </ul>
-        {% else %}
-            <p>История поездок пуста.</p>
-        {% endif %}
-    </div>
+  <div id="order-history" class="tab-content" style="display:none;">
+    <h3>История поездок</h3>
+    {% if orders %}
+      <!-- Обёртка для горизонтального скролла -->
+      <div class="table-container">
+        <table class="order-table">
+          <thead>
+            <tr>
+              <th>Дата</th>
+              <th>Время старта</th>
+              <th>Ожидание, мин</th>
+              <th>Водитель</th>
+              <th>Авто (модель / номер)</th>
+              <th>Откуда</th>
+              <th>Куда</th>
+              <th>Статус</th>
+            </tr>
+          </thead>
+          <tbody>
+          {% for o in orders %}
+            <tr>
+              <td>{{ o.date }}</td>
+              <td>{{ o.start_time }}</td>
+              <td>{{ o.wait_time }}</td>
+              <td>{{ o.first_name }} {{ o.last_name }}</td>
+              <td>{{ o.car_model }} / {{ o.car_number }}</td>
+              <td>{{ o.origin }}</td>
+              <td>{{ o.destination }}</td>
+              <td>{{ o.status }}</td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p>История поездок пуста.</p>
+    {% endif %}
+  </div>
 </div>
 
 <script>
-    function showTab(tabName) {
-        const tabs = document.querySelectorAll('.tab-content');
-        tabs.forEach(tab => {
-            tab.style.display = 'none';
-        });
-
-        const selectedTab = document.getElementById(tabName);
-        selectedTab.style.display = 'block';
-    }
+  function showTab(tabName) {
+    document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+    document.getElementById(tabName).style.display = 'block';
+  }
 </script>
 {% endblock %}

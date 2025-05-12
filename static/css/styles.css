@@ -323,4 +323,110 @@ input[type="text"]:focus + .suggestions {
 }
 
 
+/* Стили для страницы заказа */
+.order-container {
+    max-width: 800px;
+    margin: 50px auto;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.order-container h1 {
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 24px;
+}
+
+.order-container p {
+    font-size: 16px;
+    margin: 10px 0;
+}
+
+#status {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.finish-button {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-top: 20px;
+    transition: background-color 0.3s ease;
+}
+
+.finish-button:hover {
+    background-color: #45a049;
+}
+
+
+/* Таблица с темным/полупрозрачным фоном */
+.table-container {
+  overflow-x: auto;
+  margin-top: 20px;
+}
+
+.order-table {
+  width: 100%;
+  min-width: 800px;
+  border-collapse: collapse;
+  background: rgba(255, 255, 255, 0.1); /* слегка прозрачный светлый фон */
+  color: white;                            /* белый текст */
+}
+
+.order-table thead {
+  background: rgba(0, 0, 0, 0.3); /* темный полупрозрачный фон шапки */
+}
+
+.order-table thead th {
+  padding: 12px 15px;
+  font-weight: 600;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+  color: #A5D6A7; /* мягкий зелёный для заголовков */
+}
+
+.order-table tbody tr {
+  transition: background 0.3s;
+}
+
+.order-table tbody tr:nth-child(odd) {
+  background: rgba(0, 0, 0, 0.15);
+}
+
+.order-table tbody tr:nth-child(even) {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.order-table tbody tr:hover {
+  background: rgba(76, 175, 80, 0.2); /* зелёный hover */
+}
+
+.order-table td {
+  padding: 12px 15px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  vertical-align: middle;
+}
+
+/* Если ячейка со статусом "completed", "pending" или "in_progress" */
+.order-table td:nth-child(8) {
+  text-transform: capitalize;
+}
+
+.order-table td.status-pending {
+  color: #FFF176; /* жёлтый */
+}
+
+.order-table td.status-in_progress {
+  color: #29B6F6; /* голубой */
+}
+
+.order-table td.status-completed {
+  color: #66BB6A; /* зелёный */
+}
 
