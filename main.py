@@ -27,9 +27,10 @@ def init_db():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             username TEXT UNIQUE NOT NULL,
             email TEXT UNIQUE NOT NULL,
+            password TEXT NOT NULL,
             f_name TEXT NOT NULL,
             phone TEXT NOT NULL,
-            password TEXT NOT NULL,
+            payment_method TEXT DEFAULT 'cash',
             is_admin BOOLEAN DEFAULT 0
         )
     ''')
@@ -213,13 +214,71 @@ def account():
     return render_template("account.html", user=user, orders=orders)
 
 
-@app.route("/change")
+@app.route("/update_payment_method", methods=['POST'])
+def update_payment_method():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+
+    payment_method = request.form.get('payment_method')
+    if payment_method not in ('cash', 'card'):
+        flash("Неверный способ оплаты")
+        return redirect(url_for('account'))
+
+    conn = get_db_connection()
+    conn.execute(
+      "UPDATE users SET payment_method = ? WHERE id = ?",
+      (payment_method, session['user_id'])
+    )
+    conn.commit()
+    conn.close()
+
+    flash("Способ оплаты успешно обновлен!")
+    return redirect(url_for('account'))
+
+
+@app.route("/change", methods=['GET', 'POST'])
 def change():
     if 'user_id' not in session:
         return redirect(url_for('login'))
+
     user_id = session['user_id']
     conn = get_db_connection()
-    return render_template("change.html", user_id=user_id)
+
+    if request.method == 'POST':
+        new_username = request.form.get('username').strip()
+        new_email    = request.form.get('email').strip()
+        new_phone    = request.form.get('phone').strip()
+        new_name     = request.form.get('full_name').strip()
+
+        # Проверяем на уникальность username, email и phone
+        exists = conn.execute(
+            "SELECT id FROM users WHERE (username = ? OR email = ? OR phone = ?) AND id != ?",
+            (new_username, new_email, new_phone, user_id)
+        ).fetchone()
+        if exists:
+            flash("Имя пользователя, email или телефон уже заняты.", "error")
+            # Забираем текущие данные и показываем форму
+            user = conn.execute("SELECT * FROM users WHERE id = ?", (user_id,)).fetchone()
+            conn.close()
+            return render_template("change.html", user=user)
+
+        # Всё уникально — обновляем
+        conn.execute("""
+            UPDATE users
+               SET username = ?, email = ?, phone = ?, f_name = ?
+             WHERE id = ?
+        """, (new_username, new_email, new_phone, new_name, user_id))
+        conn.commit()
+        conn.close()
+
+        flash("Данные успешно обновлены!", "success")
+        return redirect(url_for('account'))
+
+    # GET-запрос — просто показываем текущие данные
+    user = conn.execute("SELECT * FROM users WHERE id = ?", (user_id,)).fetchone()
+    conn.close()
+    return render_template("change.html", user=user)
+
 
 
 @app.route('/find_car', methods=['POST'])

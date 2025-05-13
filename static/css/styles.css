@@ -430,3 +430,16 @@ input[type="text"]:focus + .suggestions {
   color: #66BB6A; /* зелёный */
 }
 
+/* Стили для стрелочки влево */
+.back-btn {
+  text-decoration: none;
+  color: #000;
+  display: inline-block;
+  margin-right: 15px;
+  vertical-align: middle;
+}
+
+.back-btn svg {
+  vertical-align: middle;
+  cursor: pointer;
+}
