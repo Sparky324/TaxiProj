@@ -33,7 +33,13 @@
                 <h3>Стоимость: <span id="price">0</span> руб.</h3>
             </div>
 
-            <button type="submit" class="submit-btn">Найти автомобиль</button>
+            {% if 'user_id' in session %}
+                <!-- Если пользователь авторизован, кнопка активна -->
+                <button type="submit" class="submit-btn">Найти автомобиль</button>
+            {% else %}
+                <!-- Если пользователь не авторизован, кнопка неактивна -->
+                <p style="color: red; text-align: center;">Пожалуйста, авторизуйтесь или зарегистрируйтесь для заказа такси</p>
+            {% endif %}
         </form>
 
         <!-- Картинки для отображения карты -->
