@@ -47,8 +47,8 @@ project-root/
 1. **Клонируйте репозиторий:**
 
 ```bash
-git clone https://github.com/yourusername/taxi-app.git
-cd taxi-app
+https://github.com/Sparky324/TaxiProj.git
+cd TaxiProj
 ```
 
 2. **Создайте виртуальное окружение (опционально):**
