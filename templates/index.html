@@ -2,25 +2,24 @@
 {% block title %}MaITaxI — Быстрое такси в вашем городе{% endblock %}
 
 {% block content %}
-    <div class="container">
         <h1 style="text-align: center; margin-bottom: 30px;">Заказать такси</h1>
         <form class="order-form" action="{{ url_for('find_car') }}" method="post">
             <div class="form-group">
-                <label>Пункт А:</label>
+                <label>точка отправления:</label>
                 <input id="pointA" name="pointA" type="text" placeholder="Откуда вас забрать?" required autocomplete="off">
                 <div id="suggestionsA" class="suggestions"></div>
                 <button type="button" class="btn-location" id="selectPointA">Указать на карте</button>
             </div>
 
             <div class="form-group">
-                <label>Пункт Б:</label>
+                <label>точка назначения:</label>
                 <input id="pointB" name="pointB" type="text" placeholder="Куда вам нужно?" required autocomplete="off">
                 <div id="suggestionsB" class="suggestions"></div>
                 <button type="button" class="btn-location" id="selectPointB">Указать на карте</button>
             </div>
 
             <div class="form-group">
-                <label>Тип автомобиля:</label>
+                <label>тип автомобиля:</label>
                 <select id="carType">
                     <option value="econom">Эконом</option>
                     <option value="comfort">Комфорт</option>
@@ -57,6 +56,10 @@
             <div class="feature-card">
                 <h3>Надежно</h3>
                 <p>Все водители проходят строгую проверку</p>
+            </div>
+            <div class="feature-card">
+                <h3>Работаем 24/7</h3>
+                <p>Оказываем услуги круглосуточно 365 дней в году</p>
             </div>
         </div>
     </div>
