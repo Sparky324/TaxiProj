@@ -5,12 +5,10 @@ import random
 from datetime import datetime
 
 app = Flask(__name__)
-app.secret_key = 'your-secret-key-here'
+app.secret_key = '1bc56986ef1b4c88a237d73aa6745897'
 
-DATABASE = 'users.db'
+DATABASE = 'database/users.db'
 
-
-# Функция для подключения к базе данных
 def get_db_connection():
     conn = sqlite3.connect(DATABASE)
     conn.row_factory = sqlite3.Row
@@ -21,7 +19,6 @@ def init_db():
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    # Создание таблицы users
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -35,7 +32,6 @@ def init_db():
         )
     ''')
 
-    # Создание таблицы drivers
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS drivers (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -47,11 +43,11 @@ def init_db():
             car_number TEXT NOT NULL,
             car_model TEXT NOT NULL,
             car_color TEXT NOT NULL,
+            car_type TEXT NOT NULL,
             status TEXT DEFAULT 'free'
         );
     """)
 
-    # Создание таблицы для заказов
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS orders (
             order_id    INTEGER PRIMARY KEY,
@@ -69,7 +65,6 @@ def init_db():
         );
     ''')
 
-    # Создание таблицы для оценок водителей
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS driver_ratings (
             driver_id INTEGER NOT NULL,
@@ -82,8 +77,6 @@ def init_db():
     conn.close()
 
 
-
-# Инициализация базы данных
 init_db()
 
 
@@ -168,12 +161,13 @@ def admin():
         car_number = request.form['car_number']
         car_model = request.form['car_model']
         car_color = request.form['car_color']
+        car_type = request.form['car_type']
 
         conn = get_db_connection()
         conn.execute('''
-            INSERT INTO drivers (first_name, last_name, middle_name, citizenship, phone, car_number, car_model, car_color)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        ''', (first_name, last_name, middle_name, citizenship, phone, car_number, car_model, car_color))
+            INSERT INTO drivers (first_name, last_name, middle_name, citizenship, phone, car_number, car_model, car_color, car_type)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (first_name, last_name, middle_name, citizenship, phone, car_number, car_model, car_color, car_type))
         conn.commit()
         conn.close()
 
@@ -285,12 +279,16 @@ def change():
 def find_car():
     user_id = session['user_id']
     conn = get_db_connection()
-    driver = conn.execute("SELECT * FROM drivers WHERE status = 'free' LIMIT 1").fetchone()
+    car_type = request.form.get('carType')
+    driver = conn.execute("""
+            SELECT * FROM drivers 
+            WHERE status = 'free' AND car_type = ? 
+            LIMIT 1
+        """, (car_type,)).fetchone()
     if not driver:
         flash("Свободных водителей нет.")
         return redirect(url_for('home'))
 
-    # Генерим order_id
     order_id = random.randint(1000, 9999)
     now = datetime.now()
     date_str = now.strftime('%Y-%m-%d')
@@ -303,12 +301,10 @@ def find_car():
         flash("Поля Пункт А и Пункт Б должны быть заполнены.")
         return redirect(url_for('home'))
 
-    wait_time = 5  #TODO: сделать определение реального времени
+    wait_time = 5
 
-    # Обновляем статус водителя
     conn.execute("UPDATE drivers SET status = 'busy' WHERE id = ?", (driver['id'],))
 
-    # Вставляем заказ с временным значением для end_time (например, пустая строка)
     conn.execute('''
         INSERT INTO orders 
           (order_id,user_id,driver_id,status,date,start_time,end_time,origin,destination,wait_time)
@@ -323,7 +319,6 @@ def find_car():
 
 @app.route('/order/<int:order_id>')
 def order(order_id):
-    # Получаем информацию о заказе
     conn = get_db_connection()
     order = conn.execute("SELECT * FROM orders WHERE order_id = ?", (order_id,)).fetchone()
 
@@ -334,7 +329,6 @@ def order(order_id):
     if not driver:
         return "Водитель не найден", 404
 
-    # Время прибытия (заглушка: 5 минут)
     arrival_time = 5
 
     return render_template('order.html', order=order, driver=driver, arrival_time=arrival_time)
@@ -347,7 +341,6 @@ def finish_trip(order_id):
 
     conn = get_db_connection()
 
-    # Обновление статуса заказа и времени завершения
     conn.execute('''
       UPDATE orders 
          SET status = 'Завершена', end_time = ?
@@ -391,7 +384,6 @@ def end_order(order_id):
     return render_template('end_order.html', order_id=order_id)
 
 
-
-
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=5000, debug=True)
+

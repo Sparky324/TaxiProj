@@ -1,9 +1,11 @@
 const apiKeySuggest = 'ce8efa73-9786-4290-9c44-961d4ea15f04';
 const apiKeyCoder = 'ce095acd-05a3-4919-9cf4-7e64c641af28';
 const apiKey2GIS = '40908dcf-36e0-4831-a99d-7face9aadadd';
-let map, placemark, targetInputId;
+
+let targetInputId;
 let coordsA = null;
 let coordsB = null;
+let mapFlag = false;
 
 // Функция для отображения подсказок
 function fetchSuggestions(inputId, suggestionsId) {
@@ -79,8 +81,6 @@ function calculatePrice() {
     const pointA = document.getElementById('pointA').value;
     const pointB = document.getElementById('pointB').value;
 
-
-
     if (pointA && pointB)
         if (coordsA && coordsB)
             getRouteFrom2GIS(coordsA[0], coordsA[1], coordsB[0], coordsB[1]);
@@ -88,7 +88,7 @@ function calculatePrice() {
 }
 
 // Функция для запроса маршрута через API 2ГИС
-function getRouteFrom2GIS(lat1, lon1, lat2, lon2) {
+function getRouteFrom2GIS(lon1, lat1, lon2, lat2) {
     const url = 'https://routing.api.2gis.com/get_dist_matrix?key=' + apiKey2GIS + '&version=2.0';
 
     const data = {
@@ -124,23 +124,23 @@ function getRouteFrom2GIS(lat1, lon1, lat2, lon2) {
 
 // Функция для обновления стоимости поездки
 function updatePrice(distance, time) {
-    const carType = document.getElementById("carType").value;
+    const carType = document.getElementById("carTypeValue").value;
     let price;
 
     const distanceInKm = distance / 1000;
 
     switch (carType) {
         case 'econom':
-            price = 150 + Math.max(distanceInKm * 10, time * 3);
+            price = 250 + Math.max(distanceInKm * 15, time * 5);
             break;
         case 'comfort':
-            price = 210 + Math.max(distanceInKm * 12, time * 4);
+            price = 350 + Math.max(distanceInKm * 17, time * 6);
             break;
         case 'business':
-            price = 350 + Math.max(distanceInKm * 15, time * 5);
+            price = 550 + Math.max(distanceInKm * 25, time * 10);
             break;
         case 'minivan':
-            price = 240 + Math.max(distanceInKm * 12, time * 4);
+            price = 350 + Math.max(distanceInKm * 18, time * 7);
             break;
     }
 
@@ -160,7 +160,7 @@ function getUserLocation() {
                     if (featureMember && featureMember.length > 0) {
                         const address = featureMember[0].GeoObject.metaDataProperty.GeocoderMetaData.text;
                         document.getElementById('pointA').value = address;
-                        coordsA = [position.coords.latitude, position.coords.longitude];  // Сохраняем координаты для Пункта А
+                        coordsA = [position.coords.longitude, position.coords.latitude];
                     } else {
                         console.error("Адрес не найден.");
                     }
@@ -181,63 +181,148 @@ function getUserLocation() {
 }
 
 // Инициализация карты
-function initMap() {
-    ymaps3.ready.then(() => {
-        map = new ymaps3.YMap(document.getElementById('map'), {
-            location: {
-                center: [55.7558, 37.6173],  // Начальные координаты (Москва)
-                zoom: 10
+async function initMap() {
+    if (!mapFlag) {
+        mapFlag = true;
+
+        await ymaps3.ready;
+
+        const {
+            YMap,
+            YMapDefaultSchemeLayer,
+            YMapControls,
+            YMapDefaultFeaturesLayer,
+            YMapMarker,
+            YMapListener
+        } = ymaps3;
+
+        const {
+            YMapZoomControl,
+            YMapGeolocationControl
+        } = await ymaps3.import('@yandex/ymaps3-controls@0.0.1');
+
+        const LOCATION = {center: coordsA, zoom: 17};
+
+        let map = new YMap(document.getElementById('map'), {location: LOCATION});
+
+        map.addChild(new YMapDefaultSchemeLayer());
+        map.addChild(new YMapDefaultFeaturesLayer({zIndex: 1800}))
+
+
+        map.addChild(new YMapControls({position: 'right'})
+            .addChild(new YMapZoomControl({}))
+        );
+
+        map.addChild(new YMapControls({position: 'top right'})
+            .addChild(new YMapGeolocationControl({}))
+        );
+
+        let flag = false;
+
+        const clickCallback = (object, event) => {
+            if (!flag) {
+                const coordinates = event.coordinates;
+
+                if (targetInputId === "pointA") {
+                    coordsA = coordinates;
+                } else {
+                    coordsB = coordinates;
+                }
+
+                const markerElement = document.createElement('div');
+                markerElement.className = 'marker-class';
+                markerElement.innerHTML = '<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAACXBIWXMAAAsTAAALEwEAmpwYAAABuklEQVR4nO2WsUoDQRRFp9FK/IWwo6ImWOUXBGuFzKgYsIqFnZUSWyuTaLBJsLNR8AvUwsKsJDGd8R920SaJVi5cmVl0o3FjIsjMyhx47JT3vvtm5xFi+GdgeSIBbh2AWU0w+uyXPBeQmowTXUEqPgpGj8CpB04RUh6YVUQmOUK0E8/plRS5OgVkF4HyDnCW879fjTB6qZUJ+J0H1ueA413gvBhUafv7NJh1SPSZeerJzr+LP9kDthaAtemwUQK49Qoem1Wtn4hOSkHZpUB8Ot5H+KdRyqvWT8CtBylGzLowIDo/iHg/hXsdDHSkmNOcb6Dv2PQYaOtgoP2RQNiFDR0hq6XDHWgOJVq7EWK08GsDjO6r1k/EevDD6xv+G12JzRAdkOvB8N0vEF0Qa4FcDwYXf6HVKhGYEI+aeGH7jI24M7qJ77kTjOZfNufhpROyxBmc5rRYHQbFrrvoLhI1bGNAMSYB1ZgEVGMSUI1JQDUmAdWYBFRjElCNSUA1JgHVmARUY9edRpCC0yBR4/bO2egykCFR47rpjlXqTsuuOZ1q9WmcRJFKzS1Xam6JRJWb6mNSlGodBvKHvAEmVo/4wCwVdgAAAABJRU5ErkJggg==" alt="map-pin">';
+
+                const marker = new YMapMarker({
+                    disableRoundCoordinates: true,
+                    mapFollowsOnDrag: true,
+                    coordinates: coordinates,
+                }, markerElement);
+
+                map.addChild(marker);
+
+                flag = true;
             }
+        };
+
+        const mapListener = new YMapListener({
+            layer: 'any',
+            onClick: clickCallback,
         });
 
-        placemark = new ymaps3.YPlacemark([55.7558, 37.6173], {
-            balloonContent: "Выберите точку на карте"
-        });
-
-        map.geoObjects.add(placemark);
-
-        map.events.add('click', (e) => {
-            const coords = e.get('coords');
-            placemark.geometry.setCoordinates(coords);  // Перемещаем метку
-            fetchAddressFromCoords(coords);  // Получаем адрес по координатам
-        });
-    });
+        map.addChild(mapListener);
+    }
 }
 
-// Получение адреса по координатам с помощью геокодера Яндекс
 function fetchAddressFromCoords(coords) {
-    fetch(`/get_address?lat=${coords[1]}&lon=${coords[0]}`)
+    fetch(`https://geocode-maps.yandex.ru/v1/?apikey=${apiKeyCoder}&geocode=${coords[0]},${coords[1]}&format=json`)
         .then(res => res.json())
         .then(data => {
-            if (data.address) {
-                document.getElementById(targetInputId).value = data.address;
-                if (targetInputId === 'pointA') {
-                    coordsA = [coords[1], coords[0]];  // Сохраняем координаты для Пункта A
-                } else if (targetInputId === 'pointB') {
-                    coordsB = [coords[1], coords[0]];  // Сохраняем координаты для Пункта B
-                }
-                if (coordsA && coordsB) {
-                    getRouteFrom2GIS(coordsA[0], coordsA[1], coordsB[0], coordsB[1]);  // Запрос маршрута при выборе обеих точек
-                }
+            const featureMember = data.response.GeoObjectCollection.featureMember;
+
+            if (featureMember && featureMember.length > 0) {
+                const address = featureMember[0].GeoObject.metaDataProperty.GeocoderMetaData.text;
+
+                document.getElementById(targetInputId).value = address;
+            } else {
+                console.error("Адрес не найден.");
             }
         })
-        .catch(error => console.error('Error fetching address:', error));
+        .catch(error => {
+            console.error('Error fetching geocoding data:', error);
+            alert("Ошибка при получении данных с геокодера.");
+        });
 }
 
 document.getElementById("selectPointA").addEventListener('click', function () {
     targetInputId = 'pointA';
     document.getElementById('map').style.display = 'block';
+    document.getElementById('approveAdress').style.display = 'block';
+    document.getElementById('selectPointA').style.display = 'none';
+    document.getElementById('selectPointB').style.display = 'none';
     initMap();
 });
 
 document.getElementById("selectPointB").addEventListener('click', function () {
     targetInputId = 'pointB';
     document.getElementById('map').style.display = 'block';
+    document.getElementById('approveAdress').style.display = 'block';
+    document.getElementById('selectPointA').style.display = 'none';
+    document.getElementById('selectPointB').style.display = 'none';
     initMap();
 });
 
-document.getElementById('carType').addEventListener('change', function () {
-    calculatePrice();
+
+const carTiles = document.querySelectorAll('.car-tile');
+const carTypeValue = document.getElementById('carTypeValue');
+
+carTiles.forEach(tile => {
+    tile.addEventListener('click', () => {
+        carTiles.forEach(t => t.classList.remove('active'));
+        tile.classList.add('active');
+        carTypeValue.value = tile.dataset.type;
+        calculatePrice();
+    });
 });
+
+document.getElementById("approveAdress").addEventListener('click', function () {
+    mapFlag = false;
+    document.getElementById('map').style.display = 'none';
+    document.getElementById('approveAdress').style.display = 'none';
+    document.getElementById('selectPointA').style.display = 'block';
+    document.getElementById('selectPointB').style.display = 'block';
+
+    if (targetInputId === 'pointA') {
+        fetchAddressFromCoords(coordsA);
+    } else {
+        fetchAddressFromCoords(coordsB);
+    }
+    clearBox('map');
+})
+
+function clearBox(elementID)
+{
+    document.getElementById(elementID).innerHTML = "";
+}
 
 getUserLocation();

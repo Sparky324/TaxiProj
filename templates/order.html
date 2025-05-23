@@ -1,13 +1,25 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Заказ №{{ order['order_id'] }}</title>
-    <!-- Подключаем внешний CSS-файл -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+{% extends "base.html" %}
+
+{% block title %}Заказ №{{ order['order_id'] }}{% endblock %}
+
+{% block content %}
+    <div class="order-container">
+        <h1>Заказ №{{ order['order_id'] }}</h1>
+        <p><strong>Водитель:</strong> {{ driver['first_name'] }} {{ driver['last_name'] }}</p>
+        <p><strong>Телефон для связи:</strong> {{ driver['phone'] }}</p>
+        <p><strong>Автомобиль:</strong> {{ driver['car_model'] }} ({{ driver['car_color'] }})</p>
+        <p><strong>Номер автомобиля:</strong> {{ driver['car_number'] }}</p>
+        <p><strong>Ожидаемое время прибытия:</strong> {{ arrival_time }} минут</p>
+        <p id="status">Статус: В пути...</p>
+
+        <!-- Форма для завершения поездки -->
+        <form method="POST" action="{{ url_for('finish_trip', order_id=order['order_id']) }}">
+            <button type="submit" id="finish_button" class="finish-button" style="display:none;">Завершить поездку</button>
+        </form>
+    </div>
+
     <script>
-        let timeRemaining = 5 * 60;
+        let timeRemaining = {{ arrival_time }} * 60;
 
         function updateStatus() {
             if (timeRemaining <= 0) {
@@ -23,25 +35,4 @@
 
         setInterval(updateStatus, 1000);
     </script>
-</head>
-<body>
-    <div class="order-container">
-        <h1>Заказ №{{ order['order_id'] }}</h1>
-        <p><strong>Водитель:</strong> {{ driver['first_name'] }} {{ driver['last_name'] }}</p>
-        <p><strong>Телефон для связи:</strong> {{ driver['phone'] }}</p>
-        <p><strong>Автомобиль:</strong> {{ driver['car_model'] }} ({{ driver['car_color'] }})</p>
-        <p><strong>Номер автомобиля:</strong> {{ driver['car_number'] }}</p>
-        <p><strong>Ожидаемое время прибытия:</strong> {{ arrival_time }} минут</p>
-        <p id="status">Статус: В пути...</p>
-
-        <!-- Кнопка для завершения поездки -->
-        <button id="finish_button" class="finish-button" style="display:none;" onclick="finishTrip()">Завершить поездку</button>
-    </div>
-
-    <script>
-        function finishTrip() {
-            window.location.href = "{{ url_for('finish_trip', order_id=order['order_id']) }}";
-        }
-    </script>
-</body>
-</html>
+{% endblock %}

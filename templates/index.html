@@ -1,6 +1,10 @@
 {% extends "base.html" %}
 {% block title %}MaITaxI — Быстрое такси в вашем городе{% endblock %}
 
+{% block head %}
+    <script src="https://api-maps.yandex.ru/v3/?apikey=ce095acd-05a3-4919-9cf4-7e64c641af28&lang=ru_RU"></script>
+{% endblock %}
+
 {% block content %}
         <h1 style="text-align: center; margin-bottom: 30px;">Заказать такси</h1>
         <form class="order-form" action="{{ url_for('find_car') }}" method="post">
@@ -8,7 +12,7 @@
               <label>точка отправления:</label>
               <div class="input-with-map">
                 <input id="pointA" name="pointA" type="text" placeholder="Откуда вас забрать?" required autocomplete="off">
-                <button type="button" class="map-icon-btn" id="selectPointA" title="Указать на карте">📍</button>
+                <button style="display: block" type="button" class="map-icon-btn" id="selectPointA" title="Указать на карте">📍</button>
               </div>
               <div id="suggestionsA" class="suggestions"></div>
             </div>
@@ -17,7 +21,7 @@
               <label>точка назначения:</label>
               <div class="input-with-map">
                 <input id="pointB" name="pointB" type="text" placeholder="Куда вам нужно?" required autocomplete="off">
-                <button type="button" class="map-icon-btn" id="selectPointB" title="Указать на карте">📍</button>
+                <button style="display: block" type="button" class="map-icon-btn" id="selectPointB" title="Указать на карте">📍</button>
               </div>
               <div id="suggestionsB" class="suggestions"></div>
             </div>
@@ -61,6 +65,7 @@
 
         <!-- Картинки для отображения карты -->
         <div id="map" style="width: 100%; height: 400px; display: none; margin-top: 20px;"></div>
+        <button style="display: none" type="button" class="btn-location" id="approveAdress">Подтвердить адрес</button>
 
         <div class="features">
             <div class="feature-card">
@@ -82,6 +87,7 @@
         </div>
     </div>
 
+    <script type="module" src="{{ url_for('static', filename='js/logic.js') }}"></script>
     <script src="{{ url_for('static', filename='js/map.js') }}"></script>
     <!-- Плавающая кнопка "Помощь -->
 <button class="floating-help" id="helpBtn">
@@ -99,7 +105,7 @@
         <p>📍 Вы можете выбрать точку прямо на карте, нажав на геометку в поле ввода.</p>
         <p>🧾 После ввода — мы рассчитаем стоимость в зависимости от расстояния и выбранного Вами тарифа.</p>
         <p>💡 Если что-то не работает — проверьте подключение к Интернету и доступ к геолокации.
-        <p>❗️ Возникли иные проблемы - звоните нам на горячую линию по номеру: +7 (969) 282-30-60. </p>
+        <p>❗️ Возникли иные проблемы — звоните нам на горячую линию по номеру: +7 (969) 282-30-60. </p>
     </div>
 </div>
    <script>
@@ -126,7 +132,6 @@
     setTimeout(() => {
         const pointA = document.getElementById('pointA').value;
         const pointB = document.getElementById('pointB').value;
-        const carType = document.getElementById('carType').value;
 
         const helpAlreadyVisible = !helpPopup.classList.contains('hidden');
 
@@ -135,18 +140,6 @@
             helpPopup.classList.remove('hidden');
         }
     }, 10000); // 10 секунд
-const carTiles = document.querySelectorAll('.car-tile');
-const carTypeValue = document.getElementById('carTypeValue');
-
-carTiles.forEach(tile => {
-    tile.addEventListener('click', () => {
-        carTiles.forEach(t => t.classList.remove('active'));
-        tile.classList.add('active');
-        carTypeValue.value = tile.dataset.type;
-        updateCreativeProgress(); // обновляем прогресс-бар, если используешь его
-    });
-});
-
 </script>
 
 {% endblock %}
