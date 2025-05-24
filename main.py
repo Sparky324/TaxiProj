@@ -192,10 +192,8 @@ def account():
     user_id = session['user_id']
     conn = get_db_connection()
 
-    # Данные пользователя
     user = conn.execute("SELECT * FROM users WHERE id = ?", (user_id,)).fetchone()
 
-    # История заказов
     orders = conn.execute('''
         SELECT o.*, d.first_name, d.last_name, d.car_model, d.car_number 
           FROM orders o
@@ -251,12 +249,11 @@ def change():
         ).fetchone()
         if exists:
             flash("Имя пользователя, email или телефон уже заняты.", "error")
-            # Забираем текущие данные и показываем форму
+
             user = conn.execute("SELECT * FROM users WHERE id = ?", (user_id,)).fetchone()
             conn.close()
             return render_template("change.html", user=user)
 
-        # Всё уникально — обновляем
         conn.execute("""
             UPDATE users
                SET username = ?, email = ?, phone = ?, f_name = ?
@@ -268,7 +265,6 @@ def change():
         flash("Данные успешно обновлены!", "success")
         return redirect(url_for('account'))
 
-    # GET-запрос — просто показываем текущие данные
     user = conn.execute("SELECT * FROM users WHERE id = ?", (user_id,)).fetchone()
     conn.close()
     return render_template("change.html", user=user)
@@ -285,6 +281,7 @@ def find_car():
             WHERE status = 'free' AND car_type = ? 
             LIMIT 1
         """, (car_type,)).fetchone()
+
     if not driver:
         flash("Свободных водителей нет.")
         return redirect(url_for('home'))
@@ -331,7 +328,22 @@ def order(order_id):
 
     arrival_time = 5
 
-    return render_template('order.html', order=order, driver=driver, arrival_time=arrival_time)
+    row = conn.execute(
+        """
+        SELECT AVG(rate) AS avg_rate
+          FROM (
+            SELECT rate
+              FROM driver_ratings
+             WHERE driver_id = ?
+             ORDER BY rowid DESC
+             LIMIT 50
+          )
+        """,
+        (driver['id'],)
+    ).fetchone()
+    avg_rating = row['avg_rate'] if row and row['avg_rate'] is not None else None
+
+    return render_template('order.html', order=order, driver=driver, arrival_time=arrival_time, avg_rating=avg_rating)
 
 
 @app.route('/finish_trip/<int:order_id>', methods=['POST'])
@@ -348,13 +360,11 @@ def finish_trip(order_id):
     ''', (end_str, order_id))
     conn.commit()
 
-    # Свободим водителя
     driver_id = conn.execute('SELECT driver_id FROM orders WHERE order_id = ?', (order_id,)).fetchone()['driver_id']
     conn.execute("UPDATE drivers SET status = 'free' WHERE id = ?", (driver_id,))
     conn.commit()
     conn.close()
 
-    # Перенаправляем на страницу оценки
     return redirect(url_for('end_order', order_id=order_id))
 
 
@@ -369,7 +379,6 @@ def end_order(order_id):
 
         conn = get_db_connection()
 
-        # Сохраняем оценку водителя
         driver_id = conn.execute('SELECT driver_id FROM orders WHERE order_id = ?', (order_id,)).fetchone()['driver_id']
         conn.execute('''
             INSERT INTO driver_ratings (driver_id, rate)

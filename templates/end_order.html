@@ -6,7 +6,7 @@
 
     <form method="POST">
         <label for="rate">Выберите оценку:</label>
-        <select id="rate" name="rate" required>
+        <select id="rate" name="rate" required class="custom-select">
             <option value="1">1 - Очень плохо</option>
             <option value="2">2 - Плохо</option>
             <option value="3">3 - Нормально</option>
@@ -14,6 +14,6 @@
             <option value="5">5 - Отлично</option>
         </select>
 
-        <button type="submit">Оценить</button>
+        <button type="submit" class="evaluate-btn">Оценить</button>
     </form>
 {% endblock %}

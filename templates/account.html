@@ -10,14 +10,11 @@
   </div>
 
   <div id="personal-data" class="tab-content">
-    <h3>Личные данные
-            <a href="{{ url_for('change') }}" class="edit-btn">
-                <!-- Новый SVG с иконкой карандаша -->
-                <svg viewBox="0 0 512.00057 512" xmlns="http://www.w3.org/2000/svg" class="edit-icon">
-                    <path d="..."/>
-                </svg>
-            </a>
-        </h3>
+    <h3 class="h3-with-edit">
+        Личные данные
+        <a href="{{ url_for('change') }}" class="edit-btn" aria-label="Редактировать">✏️</a>
+    </h3>
+
         <p><strong>Имя:</strong> {{ user.f_name }}</p>
         <p><strong>Номер телефона:</strong> {{ user.phone }}</p>
         <p><strong>Email:</strong> {{ user.email }}</p>
@@ -25,10 +22,12 @@
         <!-- Добавляем выпадающий список для способа оплаты -->
         <form action="{{ url_for('update_payment_method') }}" method="POST">
           <label for="payment_method"><strong>Способ оплаты:</strong></label>
-          <select name="payment_method" id="payment_method">
+          <select name="payment_method" id="payment_method" class="custom-select">
             <option value="cash" {% if user.payment_method == 'cash' %}selected{% endif %}>Наличные</option>
             <option value="card" {% if user.payment_method == 'card' %}selected{% endif %}>Безналичный расчет</option>
           </select>
+
+
           <button type="submit" class="update-btn">Сохранить</button>
         </form>
   </div>

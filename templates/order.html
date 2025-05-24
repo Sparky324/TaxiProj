@@ -6,15 +6,21 @@
     <div class="order-container">
         <h1>Заказ №{{ order['order_id'] }}</h1>
         <p><strong>Водитель:</strong> {{ driver['first_name'] }} {{ driver['last_name'] }}</p>
+        {% if avg_rating %}
+            <p><strong>Средний рейтинг (последние 50):</strong>
+                {{ "%.2f"|format(avg_rating) }}/5
+            </p>
+        {% else %}
+            <p><strong>Средний рейтинг:</strong> нет оценок</p>
+        {% endif %}
         <p><strong>Телефон для связи:</strong> {{ driver['phone'] }}</p>
         <p><strong>Автомобиль:</strong> {{ driver['car_model'] }} ({{ driver['car_color'] }})</p>
         <p><strong>Номер автомобиля:</strong> {{ driver['car_number'] }}</p>
         <p><strong>Ожидаемое время прибытия:</strong> {{ arrival_time }} минут</p>
         <p id="status">Статус: В пути...</p>
 
-        <!-- Форма для завершения поездки -->
         <form method="POST" action="{{ url_for('finish_trip', order_id=order['order_id']) }}">
-            <button type="submit" id="finish_button" class="finish-button" style="display:none;">Завершить поездку</button>
+            <button type="submit" id="finish_button" class="finish-button">Завершить поездку</button>
         </form>
     </div>
 
