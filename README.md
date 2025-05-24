@@ -69,6 +69,23 @@ pip install flask
 ```bash
 python app.py
 ```
+
+### Запуск через Docker
+
+```bash
+docker build -t my-taxi-app .
+```
+
+```bash
+docker run -p 8086:5000 my-taxi-app
+```
+
+После успешной сборки проекта и запуска он будет доступен по адресу
+
+```
+http://localhost:8086
+```
+
 5. **Откройте браузер и перейдите по адресу:**
 
 ```
