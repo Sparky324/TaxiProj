@@ -69,6 +69,13 @@ pip install flask
 ```bash
 python app.py
 ```
+
+### Запуск через Docker
+
+```bash
+
+```
+
 5. **Откройте браузер и перейдите по адресу:**
 
 ```
