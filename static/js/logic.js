@@ -1,13 +1,12 @@
-const apiKeySuggest = 'ce8efa73-9786-4290-9c44-961d4ea15f04';
-const apiKeyCoder = 'ce095acd-05a3-4919-9cf4-7e64c641af28';
-const apiKey2GIS = '40908dcf-36e0-4831-a99d-7face9aadadd';
+const apiKeySuggest = suggesterApiKey;
+const apiKeyCoder = coderApiKey;
+const apiKey2GIS = gisApiKey;
 
 let targetInputId;
 let coordsA = null;
 let coordsB = null;
 let mapFlag = false;
 
-// Функция для отображения подсказок
 function fetchSuggestions(inputId, suggestionsId) {
     const input = document.getElementById(inputId);
     const suggestionsContainer = document.getElementById(suggestionsId);
@@ -180,7 +179,6 @@ function getUserLocation() {
     }
 }
 
-// Инициализация карты
 async function initMap() {
     if (!mapFlag) {
         mapFlag = true;

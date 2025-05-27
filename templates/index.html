@@ -2,7 +2,12 @@
 {% block title %}MaITaxI — Быстрое такси в вашем городе{% endblock %}
 
 {% block head %}
-    <script src="https://api-maps.yandex.ru/v3/?apikey=ce095acd-05a3-4919-9cf4-7e64c641af28&lang=ru_RU"></script>
+    <script>
+        const coderApiKey = "{{ api_key_coder }}";
+        const suggesterApiKey = "{{ api_key_suggester }}"
+        const gisApiKey = "{{ api_key_gis }}"
+    </script>
+    <script src="https://api-maps.yandex.ru/v3/?apikey={{ api_key_coder }}&lang=ru_RU"></script>
 {% endblock %}
 
 {% block content %}
@@ -88,7 +93,6 @@
     </div>
 
     <script type="module" src="{{ url_for('static', filename='js/logic.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/map.js') }}"></script>
     <!-- Плавающая кнопка "Помощь -->
 <button class="floating-help" id="helpBtn">
     ?

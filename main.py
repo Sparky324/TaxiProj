@@ -3,9 +3,16 @@ import sqlite3
 from werkzeug.security import generate_password_hash, check_password_hash
 import random
 from datetime import datetime
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 app = Flask(__name__)
-app.secret_key = '1bc56986ef1b4c88a237d73aa6745897'
+app.secret_key = os.getenv("SECRET_KEY")
+SUGGESTER_API_KEY = os.getenv("YANDEX_API_KEY")
+CODER_API_KEY = os.getenv("CODER_API_KEY")
+GIS_API_KEY = os.getenv("GIS_API_KEY")
 
 DATABASE = 'database/users.db'
 
@@ -83,8 +90,8 @@ init_db()
 @app.route("/")
 def home():
     if 'user_id' in session:
-        return render_template("index.html", username=session['username'])
-    return render_template("index.html")
+        return render_template("index.html", username=session['username'], api_key_suggester=SUGGESTER_API_KEY, api_key_coder=CODER_API_KEY, api_key_gis=GIS_API_KEY)
+    return render_template("index.html", api_key_suggester=SUGGESTER_API_KEY, api_key_coder=CODER_API_KEY, api_key_gis=GIS_API_KEY)
 
 
 @app.route("/login", methods=['GET', 'POST'])
