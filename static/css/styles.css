@@ -697,3 +697,17 @@ button:hover, input:focus, select:focus {
 .order-table tbody tr:hover {
   background: rgba(0, 207, 232, 0.15);
 }
+
+.table-container {
+  overflow-x: auto;
+  width: 100%;
+}
+
+.table-container::-webkit-scrollbar {
+  height: 8px;
+}
+
+.table-container::-webkit-scrollbar-thumb {
+  background: rgba(0, 207, 232, 0.4);
+  border-radius: 4px;
+}

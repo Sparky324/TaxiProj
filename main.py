@@ -10,7 +10,7 @@ load_dotenv()
 
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY")
-SUGGESTER_API_KEY = os.getenv("YANDEX_API_KEY")
+SUGGESTER_API_KEY = os.getenv("SUGGESTER_API_KEY")
 CODER_API_KEY = os.getenv("CODER_API_KEY")
 GIS_API_KEY = os.getenv("GIS_API_KEY")
 
